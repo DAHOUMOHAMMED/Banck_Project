@@ -1,10 +1,10 @@
 #pragma once
 #include <iostream>
-#include <vector>
 #include <string>
-#include <fstream>
-#include "clsString.h"
 #include "clsPerson.h"
+#include "clsString.h"
+#include <vector>
+#include <fstream>
 
 using namespace std;
 
@@ -21,12 +21,27 @@ private:
 	enMode _Mode;
 	string _AccountNumber;
 	string _PinCode;
-	string _AccountBalance;
+	float  _AccountBalance;
+
+	static clsBanckClient _ConvertLinetoClientObject(string Line, string Seperator = "#//#")
+	{
+		vector<string> vClientData;
+		vClientData = clsString::Split(Line, Seperator);
+
+		return clsBanckClient(enMode::UpdateMode, vClientData[0], vClientData[1], vClientData[2],
+			vClientData[3], vClientData[4], vClientData[5], stof(vClientData[6]));
+
+	}
+
+	static clsBanckClient _GetEmptyClientObject()
+	{
+		return clsBanckClient(enMode::EmptyMode, "", "", "", "", "", "", 0);
+	}
 
 public:
 
 	clsBanckClient(enMode Mode , string FirstName, string LastName, string Email, string Phone , string AccountNumber,
-		string PinCode , string AccountBalance) : clsPerson( FirstName,  LastName,  Email,  Phone)
+		string PinCode , float AccountBalance) : clsPerson( FirstName,  LastName,  Email,  Phone)
 	{
 		_Mode           = Mode;
 		_AccountNumber  = AccountNumber;
@@ -42,7 +57,7 @@ public:
 	//Property Get
 	string AccountNumber()
 	{
-		return _PinCode;
+		return _AccountNumber;
 	}
 
 	//Property Set
@@ -59,17 +74,17 @@ public:
 	__declspec(property(get = GetPinCode, put = SetPinCode)) string PinCode;
 
 	//Property Set
-	void SetAccountBalance(string AccountBalance)
+	void SetAccountBalance(float AccountBalance)
 	{
 		_AccountBalance = AccountBalance;
 	}
 
 	//Property Get
-	string GetAccountBalance()
+	float GetAccountBalance()
 	{
 		return _AccountBalance;
 	}
-	__declspec(property(get = GetAccountBalance, put = SetAccountBalance)) string AccountBalance;
+	__declspec(property(get = GetAccountBalance, put = SetAccountBalance)) float AccountBalance;
 
 	void Print()
 	{
@@ -83,6 +98,69 @@ public:
 		cout << "\nAcc Number : " << _AccountNumber;
 		cout << "\nPassWord   : " << _PinCode;
 		cout << "\nBalance    : " << _AccountBalance;
+	}
+
+	static clsBanckClient Find(string AccountNumber)
+	{
+
+
+		fstream MyFile;
+		MyFile.open("Clients.txt", ios::in);//read Mode
+
+		if (MyFile.is_open())
+		{
+			string Line;
+			while (getline(MyFile, Line))
+			{
+				clsBanckClient Client = _ConvertLinetoClientObject(Line);
+				if (Client.AccountNumber() == AccountNumber)
+				{
+					MyFile.close();
+					return Client;
+				}
+
+			}
+
+			MyFile.close();
+
+		}
+
+		return _GetEmptyClientObject();
+	}
+
+	static clsBanckClient Find(string AccountNumber , string PassWord)
+	{
+
+
+		fstream MyFile;
+		MyFile.open("Clients.txt", ios::in);//read Mode
+
+		if (MyFile.is_open())
+		{
+			string Line;
+			while (getline(MyFile, Line))
+			{
+				clsBanckClient Client = _ConvertLinetoClientObject(Line);
+				if (Client.AccountNumber() == AccountNumber && Client.PinCode == PassWord)
+				{
+					MyFile.close();
+					return Client;
+				}
+
+			}
+
+			MyFile.close();
+
+		}
+
+		return _GetEmptyClientObject();
+	}
+
+	static bool IsClientExist(string AccountNumber)
+	{
+		clsBanckClient Client1 = Find(AccountNumber);
+
+		return(!Client1.IsEmpty());
 	}
 };
 
