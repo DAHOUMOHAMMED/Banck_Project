@@ -1,15 +1,13 @@
-
 #include <iostream>
-#include "clsBanckClient.h"
-
+#include "clsMainScreen.h"
 
 int main()
 
 {
-    clsBanckClient Client1 = clsBanckClient::Find("A101");
-    Client1.Print();
+
+    clsMainScreen::ShowMainMenue();
+
 
     system("pause>0");
-
     return 0;
 }
